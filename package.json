@@ -1,7 +1,7 @@
 {
 	"name": "@rbxts/binder",
 	"version": "1.0.0",
-	"description": "Typings for Quenty's Binding module",
+	"description": "Typings for Quenty's Binder module",
 	"main": "out/init.lua",
 	"scripts": {
 		"prepublishOnly": "rbxtsc"

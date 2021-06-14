@@ -1,6 +1,6 @@
 # @rbxts/binder
 
-Typings for Quenty's Binding (a Nevermore module), a module uses CollectionService to make tagged objects run by its own custom component classes
+Typings for Quenty's Binder (a Nevermore module), a module uses CollectionService to make tagged objects run by its own custom component classes
 
 ## Usage
 
