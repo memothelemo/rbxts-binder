@@ -2,6 +2,12 @@
 
 Typings for Quenty's Binder (a Nevermore module), a module uses CollectionService to make tagged objects run by its own custom component classes
 
+## Installation
+
+```
+npm i @rbxts/binder
+```
+
 ## Usage
 
 ```ts

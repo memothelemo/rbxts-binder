@@ -10,6 +10,17 @@ local CollectionService = game:GetService("CollectionService")
 local Maid = TS.import(script, TS.getModule(script, "maid").Maid)
 local Signal = TS.import(script, TS.getModule(script, "signal"))
 
+local DESCENDANT_WHITELIST = { workspace }
+
+local function isDescendantOfWhiteList(instance)
+	for _, descendant in ipairs(DESCENDANT_WHITELIST) do
+		if instance:IsDescendantOf(descendant) then
+			return true
+		end
+	end
+	return false
+end
+
 --[[
 @usage
 
@@ -81,7 +92,9 @@ function Binder:Start()
 
 	for _, inst in pairs(CollectionService:GetTagged(self._tagName)) do
 		local conn = bindable.Event:Connect(function()
-			self:_add(inst)
+			if isDescendantOfWhiteList(inst) then
+				self:_add(inst)
+			end
 		end)
 
 		bindable:Fire()
@@ -91,10 +104,14 @@ function Binder:Start()
 	bindable:Destroy()
 
 	self._maid:GiveTask(CollectionService:GetInstanceAddedSignal(self._tagName):Connect(function(inst)
-		self:_add(inst)
+		if isDescendantOfWhiteList(inst) then
+			self:_add(inst)
+		end
 	end))
 	self._maid:GiveTask(CollectionService:GetInstanceRemovedSignal(self._tagName):Connect(function(inst)
-		self:_remove(inst)
+		if isDescendantOfWhiteList(inst) then
+			self:_remove(inst)
+		end
 	end))
 end
 

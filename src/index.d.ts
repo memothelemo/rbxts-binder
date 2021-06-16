@@ -1,4 +1,5 @@
 /// <reference types="@rbxts/types" />
+
 import Signal from "@rbxts/signal";
 
 declare namespace Binder {
@@ -97,13 +98,19 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	Unbind(instance: Instance): void;
 
 	/**
-	 * See .Bind(). Acknowledges the risk of doing this on the client.
+	 * See ``.Bind()``
+	 *
+	 * Acknowledges the risk of doing this on the client.
 	 * Using this acknowledges that we're intentionally binding on a safe client object,
 	 * i.e. one without replication. If another tag is changed on this instance, this tag will be lost/changed.
 	 */
 	BindClient(instance: Instance): T;
 
-	/** See Unbind(), acknowledges risk of doing this on the client. */
+	/**
+	 * See ``Unbind()``
+	 *
+	 * Acknowledges risk of doing this on the client.
+	 */
 	UnbindClient(instance: Instance): void;
 
 	/**
@@ -117,6 +124,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 }
 
 interface BinderConstructor {
+	/** ClassName of Binder */
 	readonly ClassName: string;
 
 	/**

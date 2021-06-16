@@ -1,6 +1,6 @@
 {
 	"name": "@rbxts/binder",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Typings for Quenty's Binder module",
 	"main": "out/init.lua",
 	"scripts": {
@@ -13,6 +13,14 @@
 	"files": [
 		"out"
 	],
+	"repository": {
+		"type": "git",
+		"url": "git+ssh://git@github.com/memothelemo/rbxts-binder.git"
+	},
+	"bugs": {
+		"url": "https://github.com/memothelemo/rbxts-binder/issues"
+	},
+	"homepage": "https://github.com/memothelemo/rbxts-binder/#readme",
 	"publishConfig": {
 		"access": "public"
 	},
