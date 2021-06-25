@@ -114,10 +114,10 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	UnbindClient(instance: Instance): void;
 
 	/**
-	 * Returns a version of the class
+	 * Returns a version of the class, if it exists
 	 * @param instance
 	 */
-	Get(instance: Instance): T;
+	Get(instance: Instance): T | undefined;
 
 	/** Cleans up all bound classes, and disconnects all events */
 	Destroy(): void;
