@@ -40,7 +40,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 * });
 	 *
 	 * // Load all birds
-	 * birdBinder.Init()
+	 * birdBinder.Init();
 	 */
 	GetClassAddedSignal(): Signal<(classInst: T, inst: Instance) => void>;
 
@@ -58,7 +58,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 * 	birdBinder.GetAll().forEach(bird => bird.Update());
 	 * });
 	 *
-	 * birdBinder.Init()
+	 * birdBinder.Init();
 	 */
 	GetAll(): T[];
 
@@ -77,7 +77,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 * // Update every bird every frame
 	 * RunService.Stepped.Connect(() => {
 	 * 	for (const [bird] of birdBinder.GetAllSet()) {
-	 * 		bird:Update()
+	 * 		bird:Update();
 	 * 	}
 	 * }
 	 *
