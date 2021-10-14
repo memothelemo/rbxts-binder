@@ -1,0 +1,5 @@
+std = "roblox"
+
+[rules]
+global_usage = "allow" # roblox-ts
+incorrect_standard_library_use = "allow"

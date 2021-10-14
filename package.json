@@ -25,8 +25,8 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@rbxts/compiler-types": "^1.1.1-types.3",
-		"@rbxts/types": "^1.0.493",
+		"@rbxts/compiler-types": "^1.2.3-types.1",
+		"@rbxts/types": "^1.0.540",
 		"@typescript-eslint/eslint-plugin": "^4.26.1",
 		"@typescript-eslint/parser": "^4.26.1",
 		"eslint": "^7.28.0",

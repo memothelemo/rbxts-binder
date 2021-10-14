@@ -2,18 +2,15 @@
 -- @classmod Binder
 -- @editor memothelemo (for roblox-ts support)
 
-local TS = _G[script]
-
 local RunService = game:GetService("RunService")
 local CollectionService = game:GetService("CollectionService")
 
-local Maid = TS.import(script, TS.getModule(script, "maid").Maid)
-local Signal = TS.import(script, TS.getModule(script, "signal"))
+local Maid = require(script.Maid)
+local Signal = require(script.Signal)
+local promiseBoundClass = require(script.promiseBoundClass)
 
-local DESCENDANT_WHITELIST = { workspace }
-
-local function isDescendantOfWhiteList(instance)
-	for _, descendant in ipairs(DESCENDANT_WHITELIST) do
+local function isDescendantOfWhiteList(whitelist, instance)
+	for _, descendant in ipairs(whitelist) do
 		if instance:IsDescendantOf(descendant) then
 			return true
 		end
@@ -52,7 +49,7 @@ Binder.ClassName = "Binder"
 -- @param tagName Name of the tag to bind to. This uses CollectionService's tag system
 -- @param constructor A constructor to create the new class. Comes in three flavors.
 -- @treturn Binder
-function Binder.new(tagName, constructor)
+function Binder.new(tagName, constructor, ...)
 	local self = setmetatable({}, Binder)
 
 	self._maid = Maid.new()
@@ -64,8 +61,9 @@ function Binder.new(tagName, constructor)
 	self._pendingInstSet = {} -- [inst] = true
 
 	self._listeners = {} -- [inst] = callback
+	self._args = {...}
 
-	delay(5, function()
+	task.delay(5, function()
 		if not self._loaded then
 			warn(("Binder %q is not loaded. Call :Start() on it!"):format(self._tagName))
 		end
@@ -88,31 +86,37 @@ function Binder:Start()
 	end
 	self._loaded = true
 
-	local bindable = Instance.new("BindableEvent")
-
 	for _, inst in pairs(CollectionService:GetTagged(self._tagName)) do
-		local conn = bindable.Event:Connect(function()
-			if isDescendantOfWhiteList(inst) then
-				self:_add(inst)
-			end
-		end)
-
-		bindable:Fire()
-		conn:Disconnect()
+		task.spawn(self._add, self, inst)
 	end
 
-	bindable:Destroy()
-
 	self._maid:GiveTask(CollectionService:GetInstanceAddedSignal(self._tagName):Connect(function(inst)
-		if isDescendantOfWhiteList(inst) then
+		local canRemove = self._whitelist == nil
+		if not canRemove and isDescendantOfWhiteList(self._whitelist, inst) then
+			canRemove = true
+		end
+		if canRemove then
 			self:_add(inst)
 		end
 	end))
 	self._maid:GiveTask(CollectionService:GetInstanceRemovedSignal(self._tagName):Connect(function(inst)
-		if isDescendantOfWhiteList(inst) then
+		local canRemove = self._whitelist == nil
+		if not canRemove and isDescendantOfWhiteList(self._whitelist, inst) then
+			canRemove = true
+		end
+		if canRemove then
 			self:_remove(inst)
 		end
 	end))
+end
+
+function Binder:SetDescendantsWhitelist(descendants)
+	assert(typeof(descendants) == "table", "Bad inst'")
+	if self._whitelist ~= nil then
+		warn("[Binder.SetDescendantsWhitelist]: Attempt to override descendants whitelist")
+		return
+	end
+	self._whitelist = descendants
 end
 
 -- Returns the tag name that the binder has
@@ -153,7 +157,7 @@ birdBinder:GetClassAddedSignal():Connect(function(bird)
 end)
 
 -- Load all birds
-birdBinder:Init()
+birdBinder:Start()
 ]]
 function Binder:GetClassAddedSignal()
 	if self._classAddedSignal then
@@ -189,7 +193,7 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
-birdBinder:Init()
+birdBinder:Start()
 ]]
 --- Returns all of the classes in a new table
 function Binder:GetAll()
@@ -213,7 +217,7 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
-birdBinder:Init()
+birdBinder:Start()
 ]]
 --- Faster method to get all items in a binder
 -- NOTE: Do not mutate this set directly
@@ -237,7 +241,7 @@ end
 
 -- Unbinds the instance by removing the tag
 function Binder:Unbind(inst)
-	assert(typeof(inst) == "Instance")
+	assert(typeof(inst) == "Instance", "Bad inst'")
 
 	if RunService:IsClient() then
 		warn(("[Binder.Bind] - Unbinding '%s' done on the client! Might be disrupted upon server replication! %s")
@@ -262,7 +266,7 @@ end
 
 -- See Unbind(), acknowledges risk of doing this on the client.
 function Binder:UnbindClient(inst)
-	assert(typeof(inst) == "Instance")
+	assert(typeof(inst) == "Instance", "Bad inst")
 	CollectionService:RemoveTag(inst, self._tagName)
 end
 
@@ -270,6 +274,11 @@ end
 function Binder:Get(inst)
 	assert(typeof(inst) == "Instance", "Argument 'inst' is not an Instance")
 	return self._instToClass[inst]
+end
+
+function Binder:Promise(inst)
+	assert(typeof(inst) == "Instance", "Argument 'inst' is not an Instance")
+	return promiseBoundClass(self, inst)
 end
 
 function Binder:_add(inst)
@@ -289,11 +298,11 @@ function Binder:_add(inst)
 
 	local class
 	if type(self._constructor) == "function" then
-		class = self._constructor(inst)
+		class = self._constructor(inst, unpack(self._args))
 	elseif self._constructor.Create then
-		class = self._constructor:Create(inst)
+		class = self._constructor:Create(inst, unpack(self._args))
 	else
-		class = self._constructor.new(inst)
+		class = self._constructor.new(inst, unpack(self._args))
 	end
 
 	if self._pendingInstSet[inst] ~= true then
@@ -322,18 +331,9 @@ function Binder:_add(inst)
 	-- Fire events
 	local listeners = self._listeners[inst]
 	if listeners then
-		local bindable = Instance.new("BindableEvent")
-
 		for callback, _ in pairs(listeners) do
-			local conn = bindable.Event:Connect(function()
-				callback(class)
-			end)
-
-			bindable:Fire()
-			conn:Disconnect()
+			task.spawn(callback, class)
 		end
-
-		bindable:Destroy()
 	end
 
 	if self._classAddedSignal then
@@ -361,18 +361,9 @@ function Binder:_remove(inst)
 	-- Fire listener here
 	local listeners = self._listeners[inst]
 	if listeners then
-		local bindable = Instance.new("BindableEvent")
-
 		for callback, _ in pairs(listeners) do
-			local conn = bindable.Event:Connect(function()
-				callback(nil)
-			end)
-
-			bindable:Fire()
-			conn:Disconnect()
+			task.spawn(callback, nil)
 		end
-
-		bindable:Destroy()
 	end
 
 	-- Destroy class
@@ -389,7 +380,7 @@ function Binder:Destroy()
 	local index, class = next(self._instToClass)
 	while class ~= nil do
 		self:_remove(class)
-		assert(self._instToClass[index] == nil)
+		assert(self._instToClass[index] == nil, "Failed to remove")
 
 		index, class = next(self._instToClass)
 	end
