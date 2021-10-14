@@ -110,8 +110,10 @@ function Binder:Start()
 	end))
 end
 
+--- Sets descendants whitelist to only binds object if that object is descendant of whitelisted one
+-- @param descendants Whilelisted descendants
 function Binder:SetDescendantsWhitelist(descendants)
-	assert(typeof(descendants) == "table", "Bad inst'")
+	assert(typeof(descendants) == "table", "Bad table")
 	if self._whitelist ~= nil then
 		warn("[Binder.SetDescendantsWhitelist]: Attempt to override descendants whitelist")
 		return
@@ -270,12 +272,13 @@ function Binder:UnbindClient(inst)
 	CollectionService:RemoveTag(inst, self._tagName)
 end
 
---- Returns a version of the clas
+--- Returns a version of the class, if it exists
 function Binder:Get(inst)
 	assert(typeof(inst) == "Instance", "Argument 'inst' is not an Instance")
 	return self._instToClass[inst]
 end
 
+--- Binder:ObserveInstance() with Promise returned
 function Binder:Promise(inst)
 	assert(typeof(inst) == "Instance", "Argument 'inst' is not an Instance")
 	return promiseBoundClass(self, inst)

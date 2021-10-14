@@ -13,6 +13,9 @@ declare namespace Binder {
 }
 
 interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
+	/** ClassName of Binder */
+	readonly ClassName: string;
+
 	/** Listens for new instances and connects to the GetInstanceAddedSignal() and removed signal! */
 	Start(): void;
 
@@ -21,6 +24,15 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 
 	/** Returns whatever was set for the construtor. Used for meta-analysis of the binder, such as extracting new */
 	GetConstructor(): Binder.BinderClassConstructor<T>;
+
+	/** `Binder.ObserveInstance()` with Promise returned */
+	Promise(inst: Instance): Promise<T>;
+
+	/**
+	 * Sets descendants whitelist to only binds object if that object is descendant of whitelisted one
+	 * @param descendants Whilelisted descendants
+	 */
+	SetDescendantsWhitelist(descendants: Instance[]): void;
 
 	/**
 	 * Fired when added, and then after removal, but before destroy!
@@ -36,7 +48,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 * const birdBinder = new Binder("Bird", require(path.to.Bird) as typeof Bird);
 	 * birdBinder.GetClassAddedSignal().Connect(bird => {
 	 * 	// Make the bird squack when it's first spawned
-	 *  bird.Squack();
+	 * 	bird.Squack();
 	 * });
 	 *
 	 * // Load all birds
@@ -63,10 +75,6 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	GetAll(): T[];
 
 	/**
-	 * for (const [classObj] of thatBinder.GetAllSet()) {}
-	 */
-
-	/**
 	 * Faster method to get all items in a binder
 	 *
 	 * **NOTE**: Do not mutate this set directly
@@ -83,7 +91,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 *
 	 * birdBinder.Init()
 	 */
-	GetAllSet(): Array<[T, boolean]>;
+	GetAllSet(): Map<T, true>;
 
 	/**
 	 * Binds an instance to this binder using collection service and attempts
@@ -101,6 +109,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 * See ``.Bind()``
 	 *
 	 * Acknowledges the risk of doing this on the client.
+	 *
 	 * Using this acknowledges that we're intentionally binding on a safe client object,
 	 * i.e. one without replication. If another tag is changed on this instance, this tag will be lost/changed.
 	 */
@@ -141,7 +150,7 @@ interface BinderConstructor {
 	 * @param value
 	 * @returns boolean
 	 */
-	isBinder: <T extends Binder.BinderClass>(object: unknown) => object is Binder<T>;
+	isBinder: <T extends Binder.BinderClass = Binder.BinderClass>(object: unknown) => object is Binder<T>;
 }
 
 /**
