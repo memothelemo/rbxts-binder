@@ -45,12 +45,23 @@ game.GetService("RunService").Heartbeat.Connect(() => {
 
 ### Creating Binder class
 
+When you make Binder class, make sure it is implemented to `Binder.BinderClass`
+
+*Make sure it has `Destroy` method. Binder won't able to construct a new class without it*
+
+**Example**:
+```ts
+class DummyBinder implements BinderClass {
+	Destroy() {}
+}
+```
+
 When creating Binder implemented class, make sure the first parameter
 of the constructor function must be `Instance` type.
 
 **Example**:
 ```ts
-class DummyClass implements BinderClass {
+class DummyBinder implements BinderClass {
 	constructor(instance: Instance) {
 		print(`${instance.GetFullName()} spawned!`);
 	}
