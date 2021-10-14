@@ -1,12 +1,13 @@
 {
 	"name": "@rbxts/binder",
-	"version": "1.0.4",
+	"version": "4.1.1-ts.0",
 	"description": "Typings for Quenty's Binder module",
 	"main": "out/init.lua",
 	"scripts": {
-		"prepublishOnly": "rbxtsc"
+		"prepublishOnly": "rbxtsc",
+		"prepack": "rbxtsc"
 	},
-	"keywords": [],
+	"keywords": ["Roblox", "Lua"],
 	"author": "memothelemo",
 	"license": "MIT",
 	"types": "out/index.d.ts",

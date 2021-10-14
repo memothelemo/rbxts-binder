@@ -1,12 +1,14 @@
-# @rbxts/binder
+## @rbxts/binder
 
-Typings for Quenty's Binder (a Nevermore module), a module uses CollectionService to make tagged objects run by its own custom component classes
+Typings for Quenty's Binder (a Nevermore module)
 
 ## Installation
 
-```
-npm i @rbxts/binder
-```
+**NPM**:
+`npm i @rbxts/binder`
+
+**Yarn**:
+`yarn add @rbxts/binder`
 
 ## Usage
 
@@ -17,10 +19,7 @@ class Disco implements Binder.BinderClass {
 	Instance: Part;
 
 	constructor(instance: Instance) {
-		assert(
-			classIs(instance, "Part"),
-			"Instance parameter must be Part instance",
-		);
+		assert(classIs(instance, "Part"), "Invalid argument #1, Part expected");
 		this.Instance = instance;
 	}
 
@@ -34,9 +33,28 @@ class Disco implements Binder.BinderClass {
 const discoBinder = new Binder("Disco", Disco);
 discoBinder.Start();
 
-game
-	.GetService("RunService")
-	.Heartbeat.Connect(() =>
-		discoBinder.GetAll().forEach((object) => object.Update()),
-	);
+// have some party!
+game.GetService("RunService").Heartbeat.Connect(() => {
+	for (const object of discoBinder.GetAll()) {
+		object.Update();
+	}
+});
+```
+
+## Differences from the Luau version of Binder
+
+### Creating Binder class
+
+When creating Binder implemented class, make sure the first parameter
+of the constructor function must be `Instance` type.
+
+**Example**:
+```ts
+class DummyClass implements BinderClass {
+	constructor(instance: Instance) {
+		print(`${instance.GetFullName()} spawned!`);
+	}
+
+	Destroy() {}
+}
 ```
