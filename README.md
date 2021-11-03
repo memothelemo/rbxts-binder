@@ -2,6 +2,11 @@
 
 Typings for Quenty's Binder (a Nevermore module)
 
+## Warning
+**This is the release candidate version of this package**.
+
+We don't guarantee if Binder constructor would work for some Binder classes. Please don't try this on production. :D
+
 ## Installation
 
 **NPM**:

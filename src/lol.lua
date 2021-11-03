@@ -1,23 +1,13 @@
 --- Bind class to Roblox Instance
 -- @classmod Binder
--- @editor memothelemo (for roblox-ts support)
 
 local RunService = game:GetService("RunService")
 local CollectionService = game:GetService("CollectionService")
 
 local Maid = require(script.Maid)
-local Signal = require(script.Signal)
 local MaidTaskUtils = require(script.MaidTaskUtils)
+local Signal = require(script.Signal)
 local promiseBoundClass = require(script.promiseBoundClass)
-
-local function isDescendantOfWhiteList(whitelist, instance)
-	for _, descendant in ipairs(whitelist) do
-		if instance:IsDescendantOf(descendant) then
-			return true
-		end
-	end
-	return false
-end
 
 --[[
 @usage
@@ -27,7 +17,7 @@ local MyClass = {}
 MyClass.__index = MyClass
 
 function MyClass.new(robloxInstance)
-	print("New tagged instance of ", robloxInstance")
+	print("New tagged instance of ", robloxInstance)
 	return setmetatable({}, MyClass)
 end
 
@@ -64,7 +54,7 @@ function Binder.new(tagName, constructor, ...)
 	self._listeners = {} -- [inst] = callback
 	self._args = {...}
 
-	task.delay(5, function()
+	delay(5, function()
 		if not self._loaded then
 			warn(("Binder %q is not loaded. Call :Start() on it!"):format(self._tagName))
 		end
@@ -92,34 +82,11 @@ function Binder:Start()
 	end
 
 	self._maid:GiveTask(CollectionService:GetInstanceAddedSignal(self._tagName):Connect(function(inst)
-		local canAdd = self._whitelist == nil
-		if not canAdd and isDescendantOfWhiteList(self._whitelist, inst) then
-			canAdd = true
-		end
-		if canAdd then
-			self:_add(inst)
-		end
+		self:_add(inst)
 	end))
 	self._maid:GiveTask(CollectionService:GetInstanceRemovedSignal(self._tagName):Connect(function(inst)
-		local canRemove = self._whitelist == nil
-		if not canRemove and isDescendantOfWhiteList(self._whitelist, inst) then
-			canRemove = true
-		end
-		if canRemove then
-			self:_remove(inst)
-		end
+		self:_remove(inst)
 	end))
-end
-
---- Sets descendants whitelist to only binds object if that object is descendant of whitelisted one
--- @param descendants Whilelisted descendants
-function Binder:SetDescendantsWhitelist(descendants)
-	assert(typeof(descendants) == "table", "Bad table")
-	if self._whitelist ~= nil then
-		warn("[Binder.SetDescendantsWhitelist]: Attempt to override descendants whitelist")
-		return
-	end
-	self._whitelist = descendants
 end
 
 -- Returns the tag name that the binder has
@@ -273,16 +240,15 @@ function Binder:UnbindClient(inst)
 	CollectionService:RemoveTag(inst, self._tagName)
 end
 
---- Returns a version of the class, if it exists
+--- Returns a version of the clas
 function Binder:Get(inst)
 	assert(typeof(inst) == "Instance", "Argument 'inst' is not an Instance")
 	return self._instToClass[inst]
 end
 
---- Binder:ObserveInstance() with Promise returned
-function Binder:Promise(inst)
+function Binder:Promise(inst, cancelToken)
 	assert(typeof(inst) == "Instance", "Argument 'inst' is not an Instance")
-	return promiseBoundClass(self, inst)
+	return promiseBoundClass(self, inst, cancelToken)
 end
 
 function Binder:_add(inst)

@@ -1,18 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /// <reference types="@rbxts/types" />
 
 import Signal from "@rbxts/signal";
 
-declare namespace Binder {
-	export interface BinderClass {
-		Destroy(): void;
-	}
+type InferBinderConstructorArgs<T extends Binder.BinderClassConstructor<Binder.BinderClass, any[]>> =
+	T extends Binder.BinderClassConstructor<Binder.BinderClass, infer A> ? A : never;
 
-	export type BinderClassConstructor<T extends Binder.BinderClass> = {
-		new (instance: Instance): T;
+type InferBinderConstructorClass<T extends Binder.BinderClassConstructor<Binder.BinderClass, any[]>> =
+	T extends Binder.BinderClassConstructor<infer B, any[]> ? B : never;
+
+declare namespace Binder {
+	export interface BinderClass {}
+
+	export type BinderClassConstructor<Class extends Binder.BinderClass, Args extends any[]> = {
+		new (instance: Instance, ...args: Args): Class;
 	};
 }
 
-interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
+interface Binder<Constructor extends Binder.BinderClass = Binder.BinderClass> {
 	/** ClassName of Binder */
 	readonly ClassName: string;
 
@@ -23,10 +29,10 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	GetTag(): string;
 
 	/** Returns whatever was set for the construtor. Used for meta-analysis of the binder, such as extracting new */
-	GetConstructor(): Binder.BinderClassConstructor<T>;
+	GetConstructor(): Binder.BinderClassConstructor<Constructor, any[]>;
 
 	/** `Binder.ObserveInstance()` with Promise returned */
-	Promise(inst: Instance): Promise<T>;
+	Promise(inst: Instance): Promise<Constructor>;
 
 	/**
 	 * Sets descendants whitelist to only binds object if that object is descendant of whitelisted one
@@ -39,7 +45,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 * @param inst Instance
 	 * @param callback
 	 */
-	ObserveInstance(inst: Instance, callback: (classInst: T) => void): () => void;
+	ObserveInstance(inst: Instance, callback: (classInst: Constructor) => void): () => void;
 
 	/**
 	 * Returns a new signal that will fire whenever a class is bound to the binder
@@ -54,10 +60,10 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 * // Load all birds
 	 * birdBinder.Init();
 	 */
-	GetClassAddedSignal(): Signal<(classInst: T, inst: Instance) => void>;
+	GetClassAddedSignal(): Signal<(classInst: Constructor, inst: Instance) => void>;
 
 	/** Returns a new signal that will fire whenever a class is removed from the binder */
-	GetClassRemovingSignal(): Signal<(classInst: T, inst: Instance) => void>;
+	GetClassRemovingSignal(): Signal<(classInst: Constructor, inst: Instance) => void>;
 
 	/**
 	 * Returns all of the classes in a new table
@@ -72,7 +78,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 *
 	 * birdBinder.Init();
 	 */
-	GetAll(): T[];
+	GetAll(): Constructor[];
 
 	/**
 	 * Faster method to get all items in a binder
@@ -91,7 +97,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 *
 	 * birdBinder.Init()
 	 */
-	GetAllSet(): Map<T, true>;
+	GetAllSet(): Map<Constructor, true>;
 
 	/**
 	 * Binds an instance to this binder using collection service and attempts
@@ -113,7 +119,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 * Using this acknowledges that we're intentionally binding on a safe client object,
 	 * i.e. one without replication. If another tag is changed on this instance, this tag will be lost/changed.
 	 */
-	BindClient(instance: Instance): T;
+	BindClient(instance: Instance): Constructor;
 
 	/**
 	 * See ``Unbind()``
@@ -126,7 +132,7 @@ interface Binder<T extends Binder.BinderClass = Binder.BinderClass> {
 	 * Returns a version of the class, if it exists
 	 * @param instance
 	 */
-	Get(instance: Instance): T | undefined;
+	Get(instance: Instance): Constructor | undefined;
 
 	/** Cleans up all bound classes, and disconnects all events */
 	Destroy(): void;
@@ -143,7 +149,11 @@ interface BinderConstructor {
 	 * @param constructor A constructor to create the new class.
 	 * @returns Binder
 	 */
-	new <T extends Binder.BinderClass>(tag: string, constructor: Binder.BinderClassConstructor<T>): Binder<T>;
+	new <C extends Binder.BinderClassConstructor<Binder.BinderClass, any[]>>(
+		tag: string,
+		constructor: C,
+		...args: InferBinderConstructorArgs<C>
+	): Binder<InferBinderConstructorClass<C>>;
 
 	/**
 	 * Retrieves whether or not its a binder
