@@ -13,8 +13,6 @@ declare namespace Binder {
       };
 }
 
-// Class extends object, Args extends any[] = []
-
 interface Binder<Constructor extends Binder.BinderClassConstructor<any, any[]>> {
   /**
    * Filters binded objects with a whilelist of descendants.

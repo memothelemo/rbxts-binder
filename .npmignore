@@ -1,1 +1,10 @@
 *.tsbuildinfo
+*.toml
+
+/.npmrc
+/.gitignore
+/.editorconfig
+/.vscode
+/.github
+
+/tsconfig.json
