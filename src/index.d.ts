@@ -225,9 +225,9 @@ interface BinderConstructor {
    * @param value Any value to check if it is Binder
    * @returns boolean true or false, whether or not it is a value
    */
-  isBinder<Constructor extends Binder.BinderClassConstructor<any, any[]>>(
+  isBinder: <Constructor extends Binder.BinderClassConstructor<any, any[]>>(
     value: unknown | Binder<Constructor>,
-  ): value is Binder<Constructor>;
+  ) => value is Binder<Constructor>;
 }
 
 /**

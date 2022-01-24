@@ -24,8 +24,6 @@
 	@class Binder
 ]=]
 
-local require = require(script.Parent.loader).load(script)
-
 local RunService = game:GetService("RunService")
 local CollectionService = game:GetService("CollectionService")
 
