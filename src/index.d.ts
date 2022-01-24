@@ -1,166 +1,231 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/// <reference types="@rbxts/types" />
-
 import Signal from "@rbxts/signal";
 
-type InferBinderConstructorArgs<T extends Binder.BinderClassConstructor<Binder.BinderClass, any[]>> =
-	T extends Binder.BinderClassConstructor<Binder.BinderClass, infer A> ? A : never;
-
-type InferBinderConstructorClass<T extends Binder.BinderClassConstructor<Binder.BinderClass, any[]>> =
-	T extends Binder.BinderClassConstructor<infer B, any[]> ? B : never;
-
 declare namespace Binder {
-	export interface BinderClass {}
-
-	export type BinderClassConstructor<Class extends Binder.BinderClass, Args extends any[]> = {
-		new (instance: Instance, ...args: Args): Class;
-	};
+  export type BinderClassConstructor<Class extends object, Args extends any[]> =
+    | {
+        new (instance: Instance, ...args: Args): Class;
+      }
+    | ((instance: Instance, ...args: Args) => Class)
+    | {
+        Create(instance: Instance, ...args: Args): Class;
+      };
 }
 
-interface Binder<Constructor extends Binder.BinderClass = Binder.BinderClass> {
-	/** ClassName of Binder */
-	readonly ClassName: string;
+interface Binder<Constructor extends Binder.BinderClassConstructor<any, any[]>> {
+  /**
+   * Filters binded objects with a whilelist of descendants.
+   *
+   * This will prevent from any binded objects from creating
+   * a new instance if the object is out of descendant of the whitelist.
+   */
+  SetDescendantsWhitelist(descendants: Instance[]): void;
 
-	/** Listens for new instances and connects to the GetInstanceAddedSignal() and removed signal! */
-	Start(): void;
+  /**
+   * Listens for new instances and connects to the `GetInstanceAddedSignal()` and removed signal!
+   */
+  Start(): void;
 
-	/** Returns the tag name that the binder has */
-	GetTag(): string;
+  /**
+   * Returns the tag name that the binder has.
+   * @returns Tag name
+   */
+  GetTag(): string;
 
-	/** Returns whatever was set for the construtor. Used for meta-analysis of the binder, such as extracting new */
-	GetConstructor(): Binder.BinderClassConstructor<Constructor, any[]>;
+  /**
+   * Returns whatever was set for the constructor. Used for meta-analysis of
+   * the binder, such as extracting if parameters are allowed.
+   *
+   * @returns `BinderClassConstructor`
+   */
+  GetConstructor(): Constructor;
 
-	/** `Binder.ObserveInstance()` with Promise returned */
-	Promise(inst: Instance): Promise<Constructor>;
+  /**
+   * Fired when added, and then after removal, but before destroy!
+   *
+   * @param inst Instance to observe
+   * @param callback Callback to recieve any activites to the instance
+   * @returns Cleanup function
+   */
+  ObserveInstance(inst: Instance, callback: (instance: InferClass<Constructor>) => void): () => void;
 
-	/**
-	 * Sets descendants whitelist to only binds object if that object is descendant of whitelisted one
-	 * @param descendants Whilelisted descendants
-	 */
-	SetDescendantsWhitelist(descendants: Instance[]): void;
+  /**
+   * Returns a new signal that will fire whenever a class is bound to the binder
+   *
+   * ```ts
+   * const birdBinder = new Binder("Bird", require(path.to.Bird) as typeof Bird);
+   * birdBinder.GetClassAddedSignal().Connect((bird) => {
+   *  bird.Squack(); // Make the bird squack when it's first spawned
+   * });
+   *
+   * // Load all birds
+   * bird.Start();
+   * ```
+   *
+   * @returns Signal object
+   */
+  GetClassAddedSignal(): Signal<(classInstance: InferClass<Constructor>, instance: Instance) => void>;
 
-	/**
-	 * Fired when added, and then after removal, but before destroy!
-	 * @param inst Instance
-	 * @param callback
-	 */
-	ObserveInstance(inst: Instance, callback: (classInst: Constructor) => void): () => void;
+  /**
+   * Returns a new signal that will fire whenever a class is removing from the binder.
+   * @returns Signal object
+   */
+  GetClassRemovingSignal(): Signal<(classInstance: InferClass<Constructor>, instance: Instance) => void>;
 
-	/**
-	 * Returns a new signal that will fire whenever a class is bound to the binder
-	 * @example
-	 * // Load bird into binder
-	 * const birdBinder = new Binder("Bird", require(path.to.Bird) as typeof Bird);
-	 * birdBinder.GetClassAddedSignal().Connect(bird => {
-	 * 	// Make the bird squack when it's first spawned
-	 * 	bird.Squack();
-	 * });
-	 *
-	 * // Load all birds
-	 * birdBinder.Init();
-	 */
-	GetClassAddedSignal(): Signal<(classInst: Constructor, inst: Instance) => void>;
+  /**
+   * Returns all of the classes in a new table.
+   *
+   * ```ts
+   * const birdBinder = new Binder("Bird", require(path.to.Bird) as typeof Bird);
+   *
+   * // Update every bird every frame
+   * RunService.Stepped.Connect(() => {
+   *  for (const bird of birdBinder.GetAll()) {
+   *    bird.Update();
+   *  }
+   * });
+   *
+   * birdBinder.Start();
+   * ```
+   */
+  GetAll(): InferClass<Constructor>[];
 
-	/** Returns a new signal that will fire whenever a class is removed from the binder */
-	GetClassRemovingSignal(): Signal<(classInst: Constructor, inst: Instance) => void>;
+  /**
+   * Faster method to get all items in a binder
+   *
+   * ```ts
+   * const birdBinder = new Binder("Bird", require(path.to.Bird) as typeof Bird);
+   *
+   * // Update every bird every frame
+   * RunService.Stepped.Connect(() => {
+   *  for (const [bird, _] of birdBinder.GetAllSet()) {
+   *    bird.Update();
+   *  }
+   * });
+   *
+   * birdBinder.Start();
+   * ```
+   *
+   * **WARNING**: Do not mutate this set directly
+   * @returns Set of class instances
+   */
+  GetAllSet(): Set<InferClass<Constructor>>;
 
-	/**
-	 * Returns all of the classes in a new table
-	 * @example
-	 * // Load bird into binder
-	 * const birdBinder = new Binder("Bird", require(path.to.Bird) as typeof Bird);
-	 *
-	 * // Update every bird every frame
-	 * RunService.Stepped.Connect(() => {
-	 * 	birdBinder.GetAll().forEach(bird => bird.Update());
-	 * });
-	 *
-	 * birdBinder.Init();
-	 */
-	GetAll(): Constructor[];
+  /**
+   * Binds an instance to this binder using collection service and attempts
+   * to return it if it's bound properly. See BinderUtils.promiseBoundClass() for a safe
+   * way to retrieve it.
+   *
+   * **WARNING**: Do not assume that a bound object will be retrieved
+   *
+   * @server
+   * @param inst Instance to check
+   * @returns Bound class or undefined
+   */
+  Bind(inst: Instance): InferClass<Constructor> | undefined;
 
-	/**
-	 * Faster method to get all items in a binder
-	 *
-	 * **NOTE**: Do not mutate this set directly
-	 * @example
-	 * // Load bird into binder
-	 * const birdBinder = new Binder("Bird", require(path.to.Bird) as typeof Bird);
-	 *
-	 * // Update every bird every frame
-	 * RunService.Stepped.Connect(() => {
-	 * 	for (const [bird] of birdBinder.GetAllSet()) {
-	 * 		bird:Update();
-	 * 	}
-	 * }
-	 *
-	 * birdBinder.Init()
-	 */
-	GetAllSet(): Map<Constructor, true>;
+  /**
+   * Unbinds the instance by removing the tag.
+   *
+   * @server
+   * @param inst Instance to unbind
+   */
+  Unbind(inst: Instance): void;
 
-	/**
-	 * Binds an instance to this binder using collection service and attempts
-	 * to return it if it's bound properly
-	 *
-	 * **NOTE**: Do not assume that a bound object will be retrieved
-	 * @param instance
-	 */
-	Bind(instance: Instance): void;
+  /**
+   * See `Bind()`, acknowledges the risk of doing this on the client.
+   *
+   * Using this acknowledges that we're intentionally binding on a safe client object,
+   * i.e. one without replication. If another tag is changed on this instance, this tag will be lost/changed.
+   *
+   * @client
+   * @param inst Instance to bind
+   * @return Bound class or undefined
+   */
+  BindClient(inst: Instance): InferClass<Constructor> | undefined;
 
-	/** Unbinds the instance by removing the tag */
-	Unbind(instance: Instance): void;
+  /**
+   * See `Unbind()`, acknowledges risk of doing this on the client.
+   *
+   * @client
+   * @param inst Instance to unbind
+   */
+  UnbindClient(inst: Instance): void;
 
-	/**
-	 * See ``.Bind()``
-	 *
-	 * Acknowledges the risk of doing this on the client.
-	 *
-	 * Using this acknowledges that we're intentionally binding on a safe client object,
-	 * i.e. one without replication. If another tag is changed on this instance, this tag will be lost/changed.
-	 */
-	BindClient(instance: Instance): Constructor;
+  /**
+   * Returns a instance of the class that is bound to the instance given.
+   *
+   * @param inst Instance to check
+   * @returns Class
+   */
+  Get(inst: Instance): InferClass<Constructor> | undefined;
 
-	/**
-	 * See ``Unbind()``
-	 *
-	 * Acknowledges risk of doing this on the client.
-	 */
-	UnbindClient(instance: Instance): void;
+  /**
+   * Returns a promise which will resolve when the instance is bound.
+   *
+   * @param inst Instance to check
+   * @returns Promise<Class>
+   */
+  Promise(inst: Instance): Promise<InferClass<Constructor>>;
 
-	/**
-	 * Returns a version of the class, if it exists
-	 * @param instance
-	 */
-	Get(instance: Instance): Constructor | undefined;
-
-	/** Cleans up all bound classes, and disconnects all events */
-	Destroy(): void;
+  /**
+   * Cleans up all bound classes, and disconnects all events.
+   */
+  Destroy(): void;
 }
+
+type InferConstructArgs<C extends Binder.BinderClassConstructor<any, any[]>> = C extends Binder.BinderClassConstructor<
+  any,
+  infer A
+>
+  ? A
+  : never;
+
+type InferClass<C extends Binder.BinderClassConstructor<any, any[]>> = C extends Binder.BinderClassConstructor<
+  infer T,
+  any
+>
+  ? T
+  : never;
 
 interface BinderConstructor {
-	/** ClassName of Binder */
-	readonly ClassName: string;
+  /**
+   * Class name of Binder.
+   */
+  readonly ClassName: string;
 
-	/**
-	 * Creates a new binder object.
-	 * @constructor new Binder(tagName, constructor)
-	 * @param tagName Name of the tag to bind to. This uses CollectionService's tag system
-	 * @param constructor A constructor to create the new class.
-	 * @returns Binder
-	 */
-	new <C extends Binder.BinderClassConstructor<Binder.BinderClass, any[]>>(
-		tag: string,
-		constructor: C,
-		...args: InferBinderConstructorArgs<C>
-	): Binder<InferBinderConstructorClass<C>>;
+  /**
+   * Constructs a new binder object.
+   *
+   * ```ts
+   * const binder = new Binder("Bird", (inst) => {
+   *  print("Wow, a new bird!", inst);
+   *  return {
+   *    Destroy() {
+   *      print("Uh oh, the bird is gone!");
+   *    },
+   *  };
+   * });
+   *
+   * binder.Start();
+   * ```
+   */
+  new <Constructor extends Binder.BinderClassConstructor<any, any[]>>(
+    tagName: string,
+    constructor: Constructor,
+    ...args: InferConstructArgs<Constructor>
+  ): Binder<Constructor>;
 
-	/**
-	 * Retrieves whether or not its a binder
-	 * @param value
-	 * @returns boolean
-	 */
-	isBinder: <T extends Binder.BinderClass = Binder.BinderClass>(object: unknown) => object is Binder<T>;
+  /**
+   * Retrieves whether or not the given value is a binder.
+   *
+   * @param value Any value to check if it is Binder
+   * @returns boolean true or false, whether or not it is a value
+   */
+  isBinder: <Constructor extends Binder.BinderClassConstructor<any, any[]>>(
+    value: unknown | Binder<Constructor>,
+  ) => value is Binder<Constructor>;
 }
 
 /**

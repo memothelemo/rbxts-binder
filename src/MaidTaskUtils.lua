@@ -1,17 +1,37 @@
----
--- @module MaidTaskUtils
--- @author Quenty
+--[=[
+	Utility methods involving maids and tasks.
+	@class MaidTaskUtils
+]=]
 
+--[=[
+	An object that can have the method :Destroy() called on it
+	@type Destructable Instance | { Destroy: function }
+	@within MaidTaskUtils
+]=]
+
+--[=[
+	An object that can be cleaned up
+	@type MaidTask function | Destructable | RBXScriptConnection
+	@within MaidTaskUtils
+]=]
 local MaidTaskUtils = {}
 
+--[=[
+	Returns whether a task is a valid job.
+	@param job any
+	@return boolean
+]=]
 function MaidTaskUtils.isValidTask(job)
-	-- Changes: support for camelCase 'Destroy' method
 	return type(job) == "function"
 		or typeof(job) == "RBXScriptConnection"
 		or type(job) == "table" and type(job.Destroy) == "function"
-		or type(job) == "table" and type(job.destroy) == "function"
+		or typeof(job) == "Instance"
 end
 
+--[=[
+	Executes the task as requested.
+	@param job MaidTask -- Task to execute
+]=]
 function MaidTaskUtils.doTask(job)
 	if type(job) == "function" then
 		job()
@@ -19,13 +39,24 @@ function MaidTaskUtils.doTask(job)
 		job:Disconnect()
 	elseif type(job) == "table" and type(job.Destroy) == "function" then
 		job:Destroy()
-	elseif type(job) == "table" and type(job.destroy) == "function" then
-		job:destroy()
+	-- selene: allow(if_same_then_else)
+	elseif typeof(job) == "Instance" then
+		job:Destroy()
 	else
 		error("Bad job")
 	end
 end
 
+--[=[
+	Executes the task delayed after some time.
+	```lua
+	-- delays cleanup by 5 seconds
+	maid:GiveTask(MaidTaskUtils.delayed(5, gui))
+	```
+	@param time number -- Time in seconds
+	@param job MaidTask -- Job to delay execution
+	@return () -> () -- function that will execute the job delayed
+]=]
 function MaidTaskUtils.delayed(time, job)
 	assert(type(time) == "number", "Bad time")
 	assert(MaidTaskUtils.isValidTask(job), "Bad job")

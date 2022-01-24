@@ -1,13 +1,23 @@
---- Utility function to promise a bound class on an object
--- Using evaera's Promise implementation instead of Quenty's Promise one
--- Note: This is unstable at the moment because I don't have full knowledge of her library
--- @function promiseBoundClass
+--[=[
+	Utility function to promise a bound class on an object
+	@class promiseBoundClass
+	@edited memothelemo - Port for evaera's Promise module
+]=]
 
 local TS = _G[script.Parent]
 
 local Promise = TS.Promise
 local Maid = require(script.Parent.Maid)
 
+--[=[
+Returns a promise that resolves when the class is bound to the instance.
+@param binder Binder<T>
+@param inst Instance
+@param cancelToken CancelToken
+@return Promise<T>
+@function promiseBoundClass
+@within promiseBoundClass
+]=]
 return function(binder, inst)
 	assert(type(binder) == "table", "'binder' must be table")
 	assert(typeof(inst) == "Instance", "'inst' must be instance")
@@ -19,10 +29,13 @@ return function(binder, inst)
 
 	local maid = Maid.new()
 	local promise
+
 	promise = Promise.new(function(resolve, _, onCancel)
 		onCancel(function()
-			maid:Destroy()
-			maid = nil
+			if maid ~= nil then
+				maid:Destroy()
+				maid = nil
+			end
 		end)
 		maid:GiveTask(binder:ObserveInstance(inst, function(classAdded)
 			if classAdded then
