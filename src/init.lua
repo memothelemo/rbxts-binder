@@ -414,12 +414,11 @@ end
 	Returns a promise which will resolve when the instance is bound.
 
 	@param inst Instance -- Instance to check
-	@param cancelToken? CancelToken
 	@return Promise<T>
 ]=]
-function Binder:Promise(inst, cancelToken)
+function Binder:Promise(inst)
 	assert(typeof(inst) == "Instance", "Argument 'inst' is not an Instance")
-	return promiseBoundClass(self, inst, cancelToken)
+	return promiseBoundClass(self, inst)
 end
 
 function Binder:_add(inst)
