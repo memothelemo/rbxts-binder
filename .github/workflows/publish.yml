@@ -35,4 +35,4 @@ jobs:
           git config --global user.email "noreply@github.com"
           git add .
           git commit -m "[actions] Release ${{ github.event.release.tag_name }}"
-          git push origin HEAD
+          git push origin HEAD:master
