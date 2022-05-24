@@ -9,6 +9,7 @@ on:
 
 jobs:
   unit-tests:
+    if: contains(github.event.commits[0].message, '[actions]') == false
     name: Unit Tests
     runs-on: windows-latest
     timeout-minutes: 10

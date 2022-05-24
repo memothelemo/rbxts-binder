@@ -1,52 +1,52 @@
 {
-	"name": "@rbxts/binder",
-	"version": "4.8.0-ts.0",
-	"description": "Typings for Quenty's Binder module",
-	"main": "out/init.lua",
-	"scripts": {
+  "name": "@rbxts/binder",
+  "version": "4.8.0-ts.0",
+  "description": "Typings for Quenty's Binder module",
+  "main": "out/init.lua",
+  "scripts": {
     "prepublishOnly": "npx roblox-ts",
-		"prepack": "npx roblox-ts",
+    "prepack": "npx roblox-ts",
     "ptest:build": "cd test && npm run build && rojo build --output output.rbxlx",
     "ptest:link": "npm link && cd test && npm link @rbxts/binder",
-    "ptest": "npx roblox-ts && npm run pretest:link && npm run pretest:build",
+    "ptest": "npx roblox-ts && npm run ptest:link && npm run ptest:build",
     "test": "npm run ptest",
     "testnow": "cd test && run-in-roblox --script ./out/init.server.lua --place ./output.rbxlx"
-	},
-	"keywords": [
-		"Roblox",
-		"Lua"
-	],
-	"author": "memothelemo",
-	"license": "MIT",
-	"types": "out/index.d.ts",
-	"files": [
-		"out"
-	],
-	"repository": {
-		"type": "git",
-		"url": "git+ssh://git@github.com/memothelemo/rbxts-binder.git"
-	},
-	"bugs": {
-		"url": "https://github.com/memothelemo/rbxts-binder/issues"
-	},
-	"homepage": "https://github.com/memothelemo/rbxts-binder/#readme",
-	"publishConfig": {
-		"access": "public"
-	},
-	"devDependencies": {
-		"@rbxts/compiler-types": "^1.2.9-types.0",
-		"@rbxts/types": "^1.0.571",
-		"@typescript-eslint/eslint-plugin": "^5.10.0",
-		"@typescript-eslint/parser": "^5.10.0",
-		"eslint": "^8.7.0",
-		"eslint-config-prettier": "^8.3.0",
-		"eslint-plugin-prettier": "^4.0.0",
-		"eslint-plugin-roblox-ts": "^0.0.32",
-		"prettier": "^2.5.1",
-		"typescript": "^4.5.5"
-	},
-	"dependencies": {
-		"@rbxts/maid": "^1.0.0-ts.1",
-		"@rbxts/signal": "^1.0.3"
-	}
+  },
+  "keywords": [
+    "Roblox",
+    "Lua"
+  ],
+  "author": "memothelemo",
+  "license": "MIT",
+  "types": "out/index.d.ts",
+  "files": [
+    "out"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/memothelemo/rbxts-binder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/memothelemo/rbxts-binder/issues"
+  },
+  "homepage": "https://github.com/memothelemo/rbxts-binder/#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@rbxts/compiler-types": "^1.2.9-types.0",
+    "@rbxts/types": "^1.0.571",
+    "@typescript-eslint/eslint-plugin": "^5.10.0",
+    "@typescript-eslint/parser": "^5.10.0",
+    "eslint": "^8.7.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-roblox-ts": "^0.0.32",
+    "prettier": "^2.5.1",
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "@rbxts/maid": "^1.0.0-ts.1",
+    "@rbxts/signal": "^1.0.3"
+  }
 }
