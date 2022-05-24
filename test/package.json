@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "rbxtsc",
-    "watch": "rbxtsc -w"
+    "build": "npx rbxtsc",
+    "watch": "npx rbxtsc -w"
   },
   "keywords": [],
   "author": "",
