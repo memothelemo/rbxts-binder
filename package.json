@@ -9,7 +9,7 @@
     "ptest:build": "cd test && npm run build && rojo build --output output.rbxlx",
     "ptest:link": "npm link && cd test && npm link @rbxts/binder",
     "ptest": "npx roblox-ts && npm run ptest:link && npm run ptest:build",
-    "test": "npm run ptest",
+    "test": "npm run ptest && npm run testnow",
     "testnow": "cd test && run-in-roblox --script ./out/init.server.lua --place ./output.rbxlx"
   },
   "keywords": [
