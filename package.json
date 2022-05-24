@@ -5,7 +5,12 @@
 	"main": "out/init.lua",
 	"scripts": {
     "prepublishOnly": "rbxtsc",
-		"prepack": "rbxtsc"
+		"prepack": "rbxtsc",
+    "ptest:build": "cd test && npm run build && rojo build --output output.rbxlx",
+    "ptest:link": "npm link && cd test && npm link @rbxts/binder",
+    "ptest": "rbxtsc && npm run pretest:link && npm run pretest:build",
+    "test": "npm run ptest",
+    "testnow": "cd test && run-in-roblox --script ./out/init.server.lua --place ./output.rbxlx"
 	},
 	"keywords": [
 		"Roblox",

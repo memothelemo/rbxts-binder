@@ -24,13 +24,15 @@
 	@class Binder
 ]=]
 
+local TS = _G[script]
+
 local RunService = game:GetService("RunService")
 local CollectionService = game:GetService("CollectionService")
 
-local Maid = require(script.Maid)
-local MaidTaskUtils = require(script.MaidTaskUtils)
-local Signal = require(script.Signal)
-local promiseBoundClass = require(script.promiseBoundClass)
+local Maid = TS.import(script, script.Maid)
+local MaidTaskUtils = TS.import(script, script.MaidTaskUtils)
+local Signal = TS.import(script, script.Signal)
+local promiseBoundClass = TS.import(script, script.promiseBoundClass)
 
 local Binder = {}
 Binder.__index = Binder

@@ -1,0 +1,6 @@
+{
+  "name": "binder",
+  "tree": {
+    "$path": "out"
+  }
+}

@@ -8,3 +8,6 @@
 /.github
 
 /tsconfig.json
+
+/default.project.json
+/test

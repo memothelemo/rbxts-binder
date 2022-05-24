@@ -4,5 +4,16 @@
 /include
 *.tsbuildinfo
 
+test/node_modules
+test/out
+test/include
+
 # Packed packages
 rbxts-binder-*.*.tgz
+
+# game files
+*.rbxl
+*.rbxlx
+
+*.rbxl.lock
+*.rbxlx.lock
