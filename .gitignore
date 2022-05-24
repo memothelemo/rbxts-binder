@@ -4,6 +4,8 @@
 /include
 *.tsbuildinfo
 
+/.npmrc
+
 test/node_modules
 test/out
 test/include
