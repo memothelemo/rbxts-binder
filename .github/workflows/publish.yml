@@ -17,7 +17,7 @@ jobs:
         uses: bahmutov/npm-install@v1.7.4
 
       - name: Build the package
-        run: rbxtsc --verbose
+        run: npx roblox-ts --verbose
 
       - name: Modify version
         run: node modify-version.js ${{ github.event.release.tag_name }}

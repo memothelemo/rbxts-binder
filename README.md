@@ -2,11 +2,6 @@
 
 Typings for Quenty's Binder (a Nevermore module)
 
-## Warning
-**This is the release candidate version of this package**.
-
-We don't guarantee if Binder constructor would work for some Binder classes. Please don't try this on production. :D
-
 ## Installation
 
 **NPM**:
@@ -48,7 +43,40 @@ game.GetService("RunService").Heartbeat.Connect(() => {
 
 ## Differences from the Luau version of Binder
 
-### Creating Binder class
+### Creating Binder from a function or object
+
+It is the same thing as you normally do in Binder from Luau.
+
+**Function**
+```ts
+const binder = new Binder("Bird", (inst) => {
+	print("Wow, a new bird!", inst);
+	return {
+   		Destroy() {
+     			print("Uh oh, the bird is gone!");
+   		},
+ 	};
+});
+
+binder.Start();
+```
+
+**Object**
+```ts
+// Create method is required
+const binder = new Binder("Hello", {
+	Create(instance: Instance) {
+        print("Wow a new bird!", instance);
+        return {
+            Destroy() {
+                print("Uh oh, the bird is gone!");
+            },
+        };
+  	},
+});
+```
+
+### Creating Binder from class prototype
 
 When you make Binder class, make sure it is implemented to `Binder.BinderClass`
 
