@@ -4,11 +4,11 @@
 	"description": "Typings for Quenty's Binder module",
 	"main": "out/init.lua",
 	"scripts": {
-    "prepublishOnly": "npx rbxtsc",
-		"prepack": "npx rbxtsc",
+    "prepublishOnly": "npx roblox-ts",
+		"prepack": "npx roblox-ts",
     "ptest:build": "cd test && npm run build && rojo build --output output.rbxlx",
     "ptest:link": "npm link && cd test && npm link @rbxts/binder",
-    "ptest": "npx rbxtsc && npm run pretest:link && npm run pretest:build",
+    "ptest": "npx roblox-ts && npm run pretest:link && npm run pretest:build",
     "test": "npm run ptest",
     "testnow": "cd test && run-in-roblox --script ./out/init.server.lua --place ./output.rbxlx"
 	},
