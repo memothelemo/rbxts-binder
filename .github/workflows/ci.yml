@@ -7,6 +7,9 @@ on:
     branches:
       - master
 
+env:
+  ROBLOSECURITY: ${{ secrets.ROBLOSECURITY }}
+
 jobs:
   unit-tests:
     if: contains(github.event.commits[0].message, '[actions]') == false
@@ -17,10 +20,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2.3.4
 
+      - name: Validate Cookie
+        run: |
+          $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+          $cookie = New-Object System.Net.Cookie
+          $cookie.Name = ".ROBLOSECURITY"
+          $cookie.Value = "${{ env.ROBLOSECURITY }}"
+          $cookie.Domain = ".roblox.com"
+          $session.Cookies.Add($cookie);
+          Invoke-WebRequest "https://avatar.roblox.com/v1/avatar" -WebSession $session -UseBasicParsing
+
       - name: Install Roblox Studio
         uses: OrbitalOwen/roblox-win-installer-action@1.1
         with:
-          cookie: ${{ secrets.ROBLOSECURITY }}
+          cookie: ${{ env.ROBLOSECURITY }}
           token: ${{ secrets.GIT_TOKEN }}
 
       - name: Install Foreman
@@ -33,3 +46,9 @@ jobs:
 
       - name: Compile and run tests
         run: npm test
+        
+      - name: Screenshot
+        if: failure()
+        uses: OrbitalOwen/desktop-screenshot-action@0.1
+        with:
+          file-name: 'desktop.jpg'
