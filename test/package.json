@@ -16,7 +16,6 @@
     "typescript": "^4.6.4"
   },
   "dependencies": {
-    "@rbxts/testez": "^0.3.1-ts.7",
-    "rbxts-transformer-fs": "^1.1.2"
+    "@rbxts/testez": "^0.3.1-ts.7"
   }
 }
