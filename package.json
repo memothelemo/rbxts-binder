@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/binder",
-  "version": "6.0.0-ts.2",
+  "version": "6.0.0-ts.3",
   "description": "Typings for Quenty's Binder module",
   "main": "out/init.lua",
   "scripts": {
