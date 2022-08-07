@@ -3,6 +3,9 @@
 import Signal from "@rbxts/signal";
 
 declare namespace Binder {
+  /**
+   * Base class constructor foundation for every Binder object.
+   */
   export type BinderClassConstructor<Class extends object, Args extends any[]> =
     | {
         new (instance: Instance, ...args: Args): Class;
@@ -56,7 +59,7 @@ interface Binder<Constructor extends Binder.BinderClassConstructor<any, any[]>> 
    * ```ts
    * const birdBinder = new Binder("Bird", require(path.to.Bird) as typeof Bird);
    * birdBinder.GetClassAddedSignal().Connect((bird) => {
-   *  bird.Squack(); // Make the bird squack when it's first spawned
+   *    bird.Squack(); // Make the bird squack when it's first spawned
    * });
    *
    * // Load all birds
@@ -81,9 +84,9 @@ interface Binder<Constructor extends Binder.BinderClassConstructor<any, any[]>> 
    *
    * // Update every bird every frame
    * RunService.Stepped.Connect(() => {
-   *  for (const bird of birdBinder.GetAll()) {
-   *    bird.Update();
-   *  }
+   *    for (const bird of birdBinder.GetAll()) {
+   *      bird.Update();
+   *    }
    * });
    *
    * birdBinder.Start();
@@ -99,9 +102,9 @@ interface Binder<Constructor extends Binder.BinderClassConstructor<any, any[]>> 
    *
    * // Update every bird every frame
    * RunService.Stepped.Connect(() => {
-   *  for (const [bird, _] of birdBinder.GetAllSet()) {
-   *    bird.Update();
-   *  }
+   *    for (const [bird, _] of birdBinder.GetAllSet()) {
+   *      bird.Update();
+   *    }
    * });
    *
    * birdBinder.Start();
@@ -200,12 +203,12 @@ interface BinderConstructor {
    *
    * ```ts
    * const binder = new Binder("Bird", (inst) => {
-   *  print("Wow, a new bird!", inst);
-   *  return {
-   *    Destroy() {
-   *      print("Uh oh, the bird is gone!");
-   *    },
-   *  };
+   *    print("Wow, a new bird!", inst);
+   *    return {
+   *      Destroy() {
+   *        print("Uh oh, the bird is gone!");
+   *      },
+   *    };
    * });
    *
    * binder.Start();
